@@ -32,8 +32,7 @@
   (if (null point-stack-stack)
       (message "Stack is empty.")
     (add-to-list 'point-stack-forward-stack (list (current-buffer) (point)))
-    (switch-to-buffer (caar point-stack-stack))
-    (goto-char (cadar point-stack-stack))
+    (point-stack-go (car point-stack-stack))
     (setq point-stack-stack (cdr point-stack-stack))))
 
 (defun point-stack-forward-stack-pop ()
@@ -42,8 +41,11 @@
   (if (null point-stack-forward-stack)
       (message "forward Stack is empty.")
     (add-to-list 'point-stack-stack (list (current-buffer) (point)))
-    (switch-to-buffer (caar point-stack-forward-stack))
-    (goto-char (cadar point-stack-forward-stack))
+    (point-stack-go (car point-stack-forward-stack))
     (setq point-stack-forward-stack (cdr point-stack-forward-stack))))
+
+(defun point-stack-go (loc)
+  (switch-to-buffer (car loc))
+  (goto-char (cadr loc)))
 
 (provide 'point-stack)
