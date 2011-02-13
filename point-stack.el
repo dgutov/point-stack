@@ -24,14 +24,14 @@
   "Push current location and buffer info onto stack."
   (interactive)
   (message "Location marked.")
-  (setq point-stack-stack (cons (list (current-buffer) (point)) point-stack-stack)))
+  (add-to-list 'point-stack-stack (list (current-buffer) (point))))
 
 (defun point-stack-pop ()
   "Pop a location off the stack and move to buffer"
   (interactive)
   (if (null point-stack-stack)
       (message "Stack is empty.")
-    (setq point-stack-forward-stack (cons (list (current-buffer) (point)) point-stack-forward-stack))
+    (add-to-list 'point-stack-forward-stack (list (current-buffer) (point)))
     (switch-to-buffer (caar point-stack-stack))
     (goto-char (cadar point-stack-stack))
     (setq point-stack-stack (cdr point-stack-stack))))
@@ -41,10 +41,9 @@
   (interactive)
   (if (null point-stack-forward-stack)
       (message "forward Stack is empty.")
-    (setq point-stack-stack (cons (list (current-buffer) (point)) point-stack-stack))
+    (add-to-list 'point-stack-stack (list (current-buffer) (point)))
     (switch-to-buffer (caar point-stack-forward-stack))
     (goto-char (cadar point-stack-forward-stack))
     (setq point-stack-forward-stack (cdr point-stack-forward-stack))))
-
 
 (provide 'point-stack)
