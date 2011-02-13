@@ -21,17 +21,18 @@
 (defvar point-stack-forward-stack nil)
 
 (defun point-stack-push ()
-  "Push current location and buffer info onto stack."
+  "Push current buffer, point, and scroll position onto stack."
   (interactive)
-  (message "Location marked.")
-  (add-to-list 'point-stack-stack (list (current-buffer) (point))))
+  (point-stack-store 'point-stack-stack)
+  (setq point-stack-forward-stack nil) ; new step resets forward history
+  (message "Location marked."))
 
 (defun point-stack-pop ()
   "Pop a location off the stack and move to buffer"
   (interactive)
   (if (null point-stack-stack)
       (message "Stack is empty.")
-    (add-to-list 'point-stack-forward-stack (list (current-buffer) (point)))
+    (point-stack-store 'point-stack-forward-stack)
     (point-stack-go (car point-stack-stack))
     (setq point-stack-stack (cdr point-stack-stack))))
 
@@ -40,12 +41,19 @@
   (interactive)
   (if (null point-stack-forward-stack)
       (message "forward Stack is empty.")
-    (add-to-list 'point-stack-stack (list (current-buffer) (point)))
+    (point-stack-store 'point-stack-stack)
     (point-stack-go (car point-stack-forward-stack))
     (setq point-stack-forward-stack (cdr point-stack-forward-stack))))
 
+(defun point-stack-store (stack)
+  (let ((loc (car (symbol-value stack))))
+    (unless (and (eq (current-buffer) (car loc))
+                 (eq (point) (cadr loc)))
+      (add-to-list stack (list (current-buffer) (point) (window-start))))))
+
 (defun point-stack-go (loc)
   (switch-to-buffer (car loc))
+  (set-window-start nil (caddr loc))
   (goto-char (cadr loc)))
 
 (provide 'point-stack)
