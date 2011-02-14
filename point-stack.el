@@ -1,5 +1,6 @@
 ;; -- POINT STACK -----------------------------------------------------------------------
 ;; matt harrison (matthewharrison@gmail.com)
+;; dmitry gutov  (dgutov@yandex.ru)
 ;;
 ;; Provides forward/back stack for point.  I use load it like so:
 ;;
@@ -28,7 +29,7 @@
   (message "Location marked."))
 
 (defun point-stack-pop ()
-  "Pop a location off the stack and move to buffer"
+  "Push current location onto forward stack, move to previous location."
   (interactive)
   (if (null point-stack-stack)
       (message "Stack is empty.")
@@ -37,7 +38,7 @@
     (setq point-stack-stack (cdr point-stack-stack))))
 
 (defun point-stack-forward-stack-pop ()
-  "Pop a location off the stack and move to buffer"
+  "Push current location onto stack, pop and move to location from forward stack."
   (interactive)
   (if (null point-stack-forward-stack)
       (message "forward Stack is empty.")
@@ -47,6 +48,7 @@
 
 (defun point-stack-store (stack)
   (let ((loc (car (symbol-value stack))))
+    ;; don't push the same location twice
     (unless (and (eq (current-buffer) (car loc))
                  (eq (point) (cadr loc)))
       (add-to-list stack (list (current-buffer) (point) (window-start))))))
