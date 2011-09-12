@@ -15,47 +15,58 @@
 ;; back to that point hit f6.  I can go forward by hitting f7.
 ;;
 ;; based on http://www.emacswiki.org/emacs/JohnConnors
-;; enhanced with forward-stack
-
-(defvar point-stack-stack nil)
-;; after you pop put it on the forward stack
-(defvar point-stack-forward-stack nil)
+;; enhanced with forward stack and made both local to the current window
 
 (defun point-stack-push ()
   "Push current buffer, point, and scroll position onto stack."
   (interactive)
-  (point-stack-store 'point-stack-stack)
-  (setq point-stack-forward-stack nil) ; new step resets forward history
+  (point-stack-store 'stack)
+  (point-stack-value 'forward 'set nil) ; new step resets forward history
   (message "Location marked."))
 
 (defun point-stack-pop ()
   "Push current location onto forward stack, move to previous location."
   (interactive)
-  (if (null point-stack-stack)
+  (if (point-stack-value 'stack 'null)
       (message "Stack is empty.")
-    (point-stack-store 'point-stack-forward-stack)
-    (point-stack-go (car point-stack-stack))
-    (setq point-stack-stack (cdr point-stack-stack))))
+    (point-stack-store 'forward)
+    (point-stack-go 'stack)
+    (point-stack-value 'stack 'shift)))
 
 (defun point-stack-forward-stack-pop ()
   "Push current location onto stack, pop and move to location from forward stack."
   (interactive)
-  (if (null point-stack-forward-stack)
+  (if (point-stack-value 'forward 'null)
       (message "forward Stack is empty.")
-    (point-stack-store 'point-stack-stack)
-    (point-stack-go (car point-stack-forward-stack))
-    (setq point-stack-forward-stack (cdr point-stack-forward-stack))))
+    (point-stack-store 'stack)
+    (point-stack-go 'forward)
+    (point-stack-value 'forward 'shift)))
 
 (defun point-stack-store (stack)
-  (let ((loc (car (symbol-value stack))))
+  (let ((loc (point-stack-value stack 'car)))
     ;; don't push the same location twice
     (unless (and (eq (current-buffer) (car loc))
                  (eq (point) (cadr loc)))
-      (add-to-list stack (list (current-buffer) (point) (window-start))))))
+      (point-stack-value stack 'push
+                         (list (current-buffer) (point) (window-start))))))
 
-(defun point-stack-go (loc)
-  (switch-to-buffer (car loc))
-  (set-window-start nil (caddr loc))
-  (goto-char (cadr loc)))
+(defun point-stack-go (stack)
+  (let ((loc (point-stack-value stack 'car)))
+    (switch-to-buffer (car loc))
+    (set-window-start nil (caddr loc))
+    (goto-char (cadr loc))))
+
+(defun point-stack-value (name action &optional arg)
+  (let* ((parameter (intern (concat "point-stack-" (symbol-name name))))
+         (value (window-parameter nil parameter)))
+    (cond ((eq action 'car)
+           (car value))
+          ((eq action 'null)
+           (null value))
+          (t (set-window-parameter nil parameter
+                                   (case action
+                                     ('set arg)
+                                     ('push (cons arg value))
+                                     ('shift (cdr value))))))))
 
 (provide 'point-stack)
