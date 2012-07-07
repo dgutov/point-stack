@@ -1,7 +1,7 @@
 ;;; point-stack.el --- Back and forward stacks for point location
 
 ;; Author: Dmitry Gutov <dgutov@yandex.ru>
-;; Version: 1.0
+;; Version: 1.0.1
 
 ;;; Commentary:
 
@@ -32,7 +32,7 @@
 (defcustom point-stack-advised-functions
   '(isearch-mode find-function find-library
     find-variable find-face-definition imenu
-    helm-c-etags-default-action)
+    find-tag helm-c-etags-default-action)
   "Functions that will be advised by `point-stack-setup-advices'."
   :group 'point-stack)
 
