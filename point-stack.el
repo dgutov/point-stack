@@ -1,7 +1,7 @@
-;;; point-stack.el --- Back and forward stacks for point location
+;;; point-stack.el --- Back and forward navigation through buffer locations
 
 ;; Author: Dmitry Gutov <dgutov@yandex.ru>
-;; Version: 1.0.1
+;; Version: 1.1
 
 ;;; Commentary:
 
@@ -43,7 +43,8 @@
   (interactive)
   (point-stack--store 'stack)
   (point-stack--value 'forward 'set nil) ; New step resets forward history.
-  (message "Location saved"))
+  (when (called-interactively-p 'interactive)
+    (message "Location saved")))
 
 ;;;###autoload
 (defun point-stack-pop ()
@@ -95,13 +96,14 @@
 ;;;###autoload
 (defun point-stack-setup-advices ()
   "Advise navigation functions to call `point-stack-push' before
-any navigation is made.  This way, it can be used as a replacement
-for the global mark ring."
+any navigation is made and center the point afterward. This way,
+it can be used as a replacement for the global mark ring."
   (mapc (lambda (func)
-          (ad-add-advice
-           func '(point-stack-push nil t (advice . (lambda () (point-stack-push))))
-           'before 'last)
-          (ad-activate func nil))
+          (eval
+           `(defadvice ,func (around point-stack-push activate)
+              (point-stack-push)
+              ad-do-it
+              (recenter (/ (window-height) 2)))))
         point-stack-advised-functions))
 
 (provide 'point-stack)
