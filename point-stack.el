@@ -96,14 +96,13 @@
 ;;;###autoload
 (defun point-stack-setup-advices ()
   "Advise navigation functions to call `point-stack-push' before
-any navigation is made and center the point afterward. This way,
-it can be used as a replacement for the global mark ring."
+any navigation is made. This way, it can be used as a replacement
+for the global mark ring."
   (mapc (lambda (func)
           (eval
            `(defadvice ,func (around point-stack-push activate)
               (point-stack-push)
-              ad-do-it
-              (recenter (/ (window-height) 2)))))
+              ad-do-it)))
         point-stack-advised-functions))
 
 (provide 'point-stack)
