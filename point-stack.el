@@ -30,10 +30,9 @@
   "Back and forward stacks for point location")
 
 (defcustom point-stack-advised-functions
-  '(isearch-mode find-function find-library
-    find-variable find-face-definition imenu
-    find-tag helm-c-etags-default-action
-    beginning-of-buffer end-of-buffer)
+  '(isearch-mode find-function-do-it find-library
+    imenu beginning-of-buffer end-of-buffer
+    xref-find-definitions)
   "Functions that will be advised by `point-stack-setup-advices'."
   :group 'point-stack)
 
