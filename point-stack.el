@@ -27,7 +27,8 @@
 ;;; Code:
 
 (defgroup point-stack nil
-  "Back and forward stacks for point location")
+  "Back and forward stacks for point location"
+  :group 'convenience)
 
 (defcustom point-stack-advised-functions
   '(isearch-mode find-function-do-it find-library
@@ -76,7 +77,7 @@
 (defun point-stack--go (stack)
   (let ((loc (point-stack--value stack 'car)))
     (switch-to-buffer (car loc))
-    (set-window-start nil (caddr loc))
+    (set-window-start nil (nth 2 loc))
     (goto-char (cadr loc))))
 
 (defun point-stack--value (name action &optional arg)
@@ -87,10 +88,10 @@
           ((eq action 'null)
            (null value))
           (t (set-window-parameter nil parameter
-                                   (case action
-                                     ('set arg)
-                                     ('push (cons arg value))
-                                     ('shift (cdr value))))))))
+                                   (pcase action
+                                     (`set arg)
+                                     (`push (cons arg value))
+                                     (`shift (cdr value))))))))
 
 ;;;###autoload
 (defun point-stack-setup-advices ()
