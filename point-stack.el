@@ -57,7 +57,7 @@
 (defcustom point-stack-advised-functions
   '(isearch-mode find-function-do-it find-library
     imenu beginning-of-buffer end-of-buffer
-    xref-find-definitions)
+    xref-find-definitions counsel-imenu counsel-git-grep)
   "Functions that will be advised by `point-stack-setup-advices'."
   :group 'point-stack)
 
